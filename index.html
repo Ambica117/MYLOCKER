@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Locker</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(120deg, #000428, #004e92);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            color: #00ff99;
+        }
+    
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+        }
+    
+        h1 {
+            font-size: 3rem;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            animation: glitch 3s infinite;
+            color: #00ff99;
+        }
+    
+        h1::before,
+        h1::after {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            right: 0;
+            animation: glitch-lines 3s infinite;
+        }
+    
+        h1::before {
+            color: #ff00ff;
+            top: -2px;
+        }
+    
+        h1::after {
+            color: #00ffff;
+            top: 2px;
+        }
+    
+        @keyframes glitch {
+            0% {
+                transform: translate(0);
+            }
+            20% {
+                transform: translate(-5px, -3px);
+            }
+            40% {
+                transform: translate(5px, 3px);
+            }
+            60% {
+                transform: translate(-3px, 2px);
+            }
+            80% {
+                transform: translate(3px, -2px);
+            }
+            100% {
+                transform: translate(0);
+            }
+        }
+    
+        @keyframes glitch-lines {
+            0%, 100% {
+                clip-path: inset(0 0 0 0);
+            }
+            50% {
+                clip-path: inset(10% 0 30% 0);
+            }
+        }
+    
+        nav {
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            padding: 10px 0;
+            position: fixed;
+            top: 0;
+            z-index: 100;
+        }
+    
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    
+        nav ul li {
+            margin: 0 20px;
+        }
+    
+        nav ul li a {
+            text-decoration: none;
+            color: #00ff99;
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+        }
+    
+        nav ul li a:hover {
+            background: #00ff99;
+            color: #000;
+            border-color: #00ff99;
+        }
+    
+        main {
+            margin-top: 100px;
+            width: 80%;
+        }
+    
+        section {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+    
+        section:hover {
+            transform: scale(1.05);
+            background: rgba(0, 0, 0, 0.9);
+        }
+    
+        .files-table-container {
+            max-height: 400px; /* Sets a maximum height */
+            overflow-y: auto; /* Enables vertical scrolling */
+            border: 1px solid #00ff99; /* Optional: adds border around the container */
+            padding: 10px; /* Optional: adds padding around the table */
+        }
+    
+        .files-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #000;
+        }
+    
+        .files-table th, .files-table td {
+            padding: 12px;
+            border: 1px solid #00ff99;
+            text-align: left;
+        }
+    
+        .files-table th {
+            background-color: #004e92;
+            color: #00ff99;
+        }
+    
+        .files-table tbody tr:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .passkey-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .passkey-modal-content {
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .passkey-modal input {
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ff99;
+            color: #00ff99;
+        }
+
+        .passkey-modal button {
+            padding: 10px;
+            border: none;
+            background: #00ff99;
+            color: #000;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .passkey-modal button:hover {
+            background: #004e92;
+        }
+        .cursor-effect {
+            position: absolute;
+            pointer-events: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.8);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            animation: pulse 1s infinite;
+        }
+
+        /* Background Animation */
+        @keyframes background {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        body {
+            animation: background 20s infinite alternate linear;
+        }
+
+        /* Cursor Effects */
+        body {
+            cursor: crosshair;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <h1 data-text="My LOCKER">My LOCKER</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#dashboard">Dashboard</a></li>
+            <li><a href="#files">Files</a></li>
+            <li><a href="#activity">Activity Feed</a></li>
+            <li><a href="#tools">Tools</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="dashboard">
+            <h2>Dashboard</h2>
+            <p>Welcome to the My Locker. This is your one-stop solution for managing everything cyber.</p>
+        </section>
+        <section id="files">
+            <h2>Files</h2>
+            <div class="files-table-container">
+                <table class="files-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Last Modified</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="showPasskey('MNAFFHFGKVSSNYJS')"> 
+                            <td>MNAFFHFGKVSSNYJS.zip</td>
+                            <td>Zip</td>
+                            <td>3.2 MB</td>
+                            <td>Jan 10, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('NJQMKRKDEVSUOGWTKLDTEKWZ')">
+                            <td>NJQMKRKDEVSUOGWTKLDTEKWZ.exe</td>
+                            <td>Executable</td>
+                            <td>1.1 MB</td>
+                            <td>Feb 1, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('OPAALCUCSJSUW')"> 
+                            <td>OPAALCUCSJSUW.zip</td>
+                            <td>Zip</td>
+                            <td>2.5 MB</td>
+                            <td>Mar 15, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('TMNQRVZAWXAAMJXIFR')">
+                            <td>TMNQRVZAWXAAMJXIFR.exe</td>
+                            <td>Executable</td>
+                            <td>3.0 MB</td>
+                            <td>Apr 10, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('ESIUAARGJIFJUYHOJVGN')"> 
+                            <td>ESIUAARGJIFJUYHOJVGN.zip</td>
+                            <td>Zip</td>
+                            <td>5.0 MB</td>
+                            <td>May 5, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('UPKVUSMBXIFR')">
+                            <td>UPKVUSMBXIFR.exe</td>
+                            <td>Executable</td>
+                            <td>2.8 MB</td>
+                            <td>Jun 12, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('DCZEGVPRNCKANYJS')"> 
+                            <td>DCZEGVPRNCKANYJS.zip</td>
+                            <td>Zip</td>
+                            <td>1.5 MB</td>
+                            <td>Jul 21, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('EGHDWYERKVWIMLG')">
+                            <td>EGHDWYERKVWIMLG.exe</td>
+                            <td>Executable</td>
+                            <td>4.0 MB</td>
+                            <td>Aug 14, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('BPEUWTQPELAHZZWVC')"> 
+                            <td>BPEUWTQPELAHZZWVC.zip</td>
+                            <td>Zip</td>
+                            <td>2.3 MB</td>
+                            <td>Sep 20, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('SMHLWUSYPMKHHGJOK')">
+                            <td>SMHLWUSYPMKHHGJOK.exe</td>
+                            <td>Executable</td>
+                            <td>3.7 MB</td>
+                            <td>Oct 18, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('SPWVVCUCSBJBERXIFR')"> 
+                            <td>SPWVVCUCSBJBERXIFR.zip</td>
+                            <td>Zip</td>
+                            <td>4.6 MB</td>
+                            <td>Nov 3, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('XGXMJAKDEVSUOGWTAUEREBMAUMJ')">
+                            <td>XGXMJAKDEVSUOGWTAUEREBMAUMJ.exe</td>
+                            <td>Executable</td>
+                            <td>2.9 MB</td>
+                            <td>Dec 15, 2025</td>
+                        </tr>
+                        <tr onclick="showPasskey('AYGEGVPZWVC')"> 
+                            <td>AYGEGVPZWVC.zip</td>
+                            <td>Zip</td>
+                            <td>3.4 MB</td>
+                            <td>Jan 25, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('TGCPDHZBNQVNQZWVC')">
+                            <td>TGCPDHZBNQVNQZWVC.exe</td>
+                            <td>Executable</td>
+                            <td>1.8 MB</td>
+                            <td>Feb 10, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('UPKVKAALAASCULCATHZI')"> 
+                            <td>UPKVKAALAASCULCATHZI.zip</td>
+                            <td>Zip</td>
+                            <td>2.1 MB</td>
+                            <td>Mar 15, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('TMNQRVZPELYLNYJS')">
+                            <td>TMNQRVZPELYLNYJS.exe</td>
+                            <td>Executable</td>
+                            <td>3.2 MB</td>
+                            <td>Apr 5, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('EGHDWYXGJMFHFGKVSSNYJS')"> 
+                            <td>EGHDWYXGJMFHFGKVSSNYJS.zip</td>
+                            <td>Zip</td>
+                            <td>2.8 MB</td>
+                            <td>May 12, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('QTAZYYQCJBJBERXIFR')">
+                            <td>QTAZYYQCJBJBERXIFR.exe</td>
+                            <td>Executable</td>
+                            <td>1.6 MB</td>
+                            <td>Jun 18, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('EYLXZPDCXIFR')"> 
+                            <td>EYLXZPDCXIFR.zip</td>
+                            <td>Zip</td>
+                            <td>4.0 MB</td>
+                            <td>Jul 22, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('BGJMUYQQPNAUMLYQSSECNDAJQQ')">
+                            <td>BGJMUYQQPNAUMLYQSSECNDAJQQ.exe</td>
+                            <td>Executable</td>
+                            <td>3.1 MB</td>
+                            <td>Aug 9, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('YCPZGJURUJSUW')"> 
+                            <td>YCPZGJURUJSUW.zip</td>
+                            <td>Zip</td>
+                            <td>2.7 MB</td>
+                            <td>Sep 15, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('XCCIUFFPQALIMLG')">
+                            <td>XCCIUFFPQALIMLG.exe</td>
+                            <td>Executable</td>
+                            <td>3.4 MB</td>
+                            <td>Oct 20, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('HYJOMHDBOINPZEOJSUW')"> 
+                            <td>HYJOMHDBOINPZEOJSUW.zip</td>
+                            <td>Zip</td>
+                            <td>2.0 MB</td>
+                            <td>Nov 25, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('OPKEFIMLG')">
+                            <td>OPKEFIMLG.exe</td>
+                            <td>Executable</td>
+                            <td>4.2 MB</td>
+                            <td>Dec 18, 2026</td>
+                        </tr>
+                        <tr onclick="showPasskey('RGNALJMNEBSSNYJS')"> 
+                            <td>RGNALJMNEBSSNYJS.zip</td>
+                            <td>Zip</td>
+                            <td>3.8 MB</td>
+                            <td>Jan 30, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('GLEBQUMREWFHXZWVC')">
+                            <td>GLEBQUMREWFHXZWVC.exe</td>
+                            <td>Executable</td>
+                            <td>1.9 MB</td>
+                            <td>Feb 25, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('OPAALDAMZNAUMLYQSS')"> 
+                            <td>OPAALDAMZNAUMLYQSS.exe</td>
+                            <td>Executable</td>
+                            <td>2.3 MB</td>
+                            <td>Mar 18, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('OCJBWUZGWTKHHGJOKIMLG')">
+                            <td>OCJBWUZGWTKHHGJOKIMLG.zip</td>
+                            <td>Zip</td>
+                            <td>3.5 MB</td>
+                            <td>Apr 25, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('NCWKGUFPQALIMLG')"> 
+                            <td>NCWKGUFPQALIMLG.exe</td>
+                            <td>Executable</td>
+                            <td>4.1 MB</td>
+                            <td>May 10, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('MRHIFAUADIJIAPXIFR')">
+                            <td>MRHIFAUADIJIAPXIFR.zip</td>
+                            <td>Zip</td>
+                            <td>2.2 MB</td>
+                            <td>Jun 22, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('ICHTKWDGJOFHFGKVSSNYJS')"> 
+                            <td>ICHTKWDGJOFHFGKVSSNYJS.exe</td>
+                            <td>Executable</td>
+                            <td>2.0 MB</td>
+                            <td>Jul 30, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('SJKJSSFPQALIMLG')"> 
+                            <td>SJKJSSFPQALIMLG.exe</td>
+                            <td>Executable</td>
+                            <td>2.7 MB</td>
+                            <td>May 15, 2028</td>
+                        </tr>
+                        <tr onclick="showPasskey('DGRMJZFMJMTHZI')">
+                            <td>DGRMJZFMJMTHZI.zip</td>
+                            <td>Zip</td>
+                            <td>1.7 MB</td>
+                            <td>Aug 20, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('NJQMJPPEAASCULCATHZI')"> 
+                            <td>NJQMJPPEAASCULCATHZI.exe</td>
+                            <td>Executable</td>
+                            <td>3.4 MB</td>
+                            <td>Sep 5, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('YYLTWNDMRMTHZI')">
+                            <td>YYLTWNDMRMTHZI.zip</td>
+                            <td>Zip</td>
+                            <td>2.9 MB</td>
+                            <td>Oct 10, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('OJAIJCUCSNAUMLYQSSSPKCH')"> 
+                            <td>OJAIJCUCSNAUMLYQSSSPKCH.exe</td>
+                            <td>Executable</td>
+                            <td>4.3 MB</td>
+                            <td>Nov 12, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('ZMNBZZFYNVSAUMJIDIMLG')">
+                            <td>ZMNBZZFYNVSAUMJIDIMLG.zip</td>
+                            <td>Zip</td>
+                            <td>3.1 MB</td>
+                            <td>Dec 25, 2027</td>
+                        </tr>
+                        <tr onclick="showPasskey('BYYQXPOEWBWDMWXIFR')"> 
+                            <td>BYYQXPOEWBWDMWXIFR.exe</td>
+                            <td>Executable</td>
+                            <td>2.6 MB</td>
+                            <td>Jan 10, 2028</td>
+                        </tr>
+                        <tr onclick="showPasskey('HYHTWFAYGNAUMLYQSSNYJS')">
+                            <td>HYHTWFAYGNAUMLYQSSNYJS.zip</td>
+                            <td>Zip</td>
+                            <td>3.9 MB</td>
+                            <td>Feb 5, 2028</td>
+                        </tr>
+                        <tr onclick="showPasskey('QTAZYYQCJOJVHCXIFR')"> 
+                            <td>QTAZYYQCJOJVHCXIFR.exe</td>
+                            <td>Executable</td>
+                            <td>4.0 MB</td>
+                            <td>Mar 15, 2028</td>
+                        </tr>
+                        <tr onclick="showPasskey('RMNBAAGBANAUMLYQSSNYJS')">
+                            <td>RMNBAAGBANAUMLYQSSNYJS.zip</td>
+                            <td>Zip</td>
+                            <td>3.6 MB</td>
+                            <td>Apr 12, 2028</td>
+                        </tr>                                               
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <section id="activity">
+            <h2>Activity Feed</h2>
+            <p>Successfully logged into system 'test-server1' via SSH using stolen credentials.</p>
+            <p> Failed login attempt on 'admin' account, IP: 192.168.1.101.</p>
+            <p>Attempted RDP login to target server. Password guessed incorrectly, 5 attempts failed.</p>
+        </section>
+        <section id="tools">
+            <h2>Tools</h2>
+            <p> encrypting alphabetic text where each letter of the plaintext is encoded with a different Caesar cipher, whose increment is determined by the corresponding letter of another text, the key MYWISH.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 My Locker</p>
+    </footer>
+
+    <!-- Passkey Modal -->
+    <div id="passkeyModal" class="passkey-modal">
+        <div class="passkey-modal-content">
+            <h3>Enter Passkey for <span id="file-name">Global_Trust_Bank.exe</span></h3>
+            <input type="password" id="passkey" placeholder="Enter passkey">
+            <button onclick="verifyPasskey()">Submit</button>
+        </div>
+    </div>
+    <div id="cursor" class="cursor-effect"></div>
+    <script>
+        function showPasskey(fileName) {
+            // Show modal and update file name
+            document.getElementById('file-name').textContent = fileName;
+            document.getElementById('passkeyModal').style.display = 'flex';
+        }
+    
+        function verifyPasskey() {
+            const passkeyInput = document.getElementById('passkey');
+            const passkey = passkeyInput.value;
+            const fileName = document.getElementById('file-name').textContent.trim();
+    
+            if (fileName === "SJKJSSFPQALIMLG" && passkey === 'ecnallievrusrednuerauoy') {
+                document.getElementById('passkeyModal').style.display = 'none';
+                loadNewSection(); // Load new section dynamically
+            } else {
+                alert('Invalid passkey. Please try again.');
+                passkeyInput.value = '';
+            }
+        }
+        
+        function loadNewSection() {
+            const mainContent = document.querySelector('main');
+            mainContent.innerHTML = ''; // Clear existing sections
+        
+            // Add new section dynamically
+            const newSection = document.createElement('section');
+            newSection.style.padding = '20px';
+            newSection.style.background = 'rgba(0, 0, 0, 0.7)';
+            newSection.style.borderRadius = '10px';
+            newSection.style.color = '#00ff99';
+            newSection.innerHTML = `
+                <h2>Access Granted</h2>
+                <p>Welcome! You have successfully unlocked the protected content.</p>
+        
+                <!-- Table for displaying file details -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">File Name</th>
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Size</th>
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Type</th>
+                            <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${generateFileRows()}
+                    </tbody>
+                </table>
+            `;
+        
+            mainContent.appendChild(newSection);
+        }
+        
+        function loadNewSection() {
+            const mainContent = document.querySelector('main');
+            mainContent.innerHTML = ''; // Clear existing sections
+        
+            // Add new section dynamically
+            const newSection = document.createElement('section');
+            newSection.style.padding = '20px';
+            newSection.style.background = 'rgba(0, 0, 0, 0.7)';
+            newSection.style.borderRadius = '10px';
+            newSection.style.color = '#00ff99';
+            newSection.innerHTML = `
+                <h2>Customer Details</h2>
+                <!-- Table container with scroll -->
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">File Name</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Size</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Type</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Date</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateFileRows()}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        
+            mainContent.appendChild(newSection);
+        }
+        
+        function loadNewSection() { 
+            const mainContent = document.querySelector('main');
+            mainContent.innerHTML = ''; // Clear existing sections
+        
+            // Add new section dynamically
+            const newSection = document.createElement('section');
+            newSection.style.padding = '20px';
+            newSection.style.background = 'rgba(0, 0, 0, 0.7)';
+            newSection.style.borderRadius = '10px';
+            newSection.style.color = '#00ff99';
+            newSection.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Customer Details</h2>
+                    <button id="deleteButton" style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;">Delete</button>
+                </div>
+                <!-- Table container with scroll -->
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">File Name</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Size</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Type</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateFileRows()}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        
+            mainContent.appendChild(newSection);
+        
+            // Add click event for the delete button
+            const deleteButton = document.getElementById('deleteButton');
+            deleteButton.addEventListener('click', function() {
+                const confirmDelete = window.confirm('Are you sure you want to delete all customer details? This action cannot be undone.');
+                if (confirmDelete) {
+                    mainContent.innerHTML = ''; // Clear the content of the main section
+                    showDeleteSuccessPopup(); // Show custom success popup
+                }
+            });
+        }
+        
+        // Function to generate file rows with customer names and file details
+        function generateFileRows() {
+            const customerNames = [
+                'John Doe', 'Jane Smith', 'Alice Brown', 'Bob Johnson', 'Michael Lee',
+                'Sarah White', 'David Harris', 'Emily Clark', 'James Miller', 'William Wilson',
+                'Sophia Scott', 'Daniel Moore', 'Mia Taylor', 'Lucas Jackson', 'Charlotte Lewis',
+                'Henry Young', 'Amelia King', 'Ethan Green', 'Lily Adams', 'Oliver Baker',
+                'Elijah Gonzalez', 'Harper Carter', 'Alexander Mitchell', 'Zoe Perez', 'Benjamin Perez',
+                'Grace Roberts', 'Matthew Evans', 'Chloe Nelson', 'Aiden Hall', 'Ella Allen',
+                'Sebastian Gonzalez', 'Avery King', 'Jack Hill', 'Madison Green', 'Lucas Adams',
+                'Isabella Scott', 'Mason Cooper', 'Megan Lee', 'Levi Young', 'Victoria Wright',
+                'Daniel Walker', 'Scarlett Moore', 'Wyatt Allen', 'Joshua Perez', 'Natalie Hill',
+                'Samuel Mitchell', 'Maya Martinez', 'Henry White', 'Ella Parker', 'Caleb King',
+                'Oliver Ross', 'Lillian Carter', 'Cameron Walker', 'Isla Clark', 'James White',
+                'Liam Davis', 'Eva Taylor', 'Isaac Murphy', 'Eli Green', 'Jacob Moore',
+                'Grace Adams', 'Owen Roberts', 'Lily King', 'Mila Lee', 'Archer Harris',
+                'Zoe Evans', 'Matthew Wright', 'Sophia Hall', 'Madison Allen', 'Henry Mitchell',
+                'Aiden Taylor', 'Benjamin Scott', 'Lillian Young', 'Amelia Moore', 'James Harris',
+                'Sebastian Johnson', 'David Taylor', 'Grace Walker', 'Mason Lee', 'Natalie Wright',
+                'Charlotte Moore', 'Lucas Harris', 'Jack Wright', 'Wyatt Evans', 'Isabella Miller',
+                'Daniel Roberts', 'Lily Moore', 'Mason Evans', 'Carter Wilson', 'Zoe Taylor',
+                'Lucas White', 'Owen Johnson', 'Madeline Taylor', 'Isaac Scott', 'Maya Johnson',
+                'Aiden Moore', 'Oliver Adams', 'Harper Wilson', 'James Taylor', 'Henry Carter',
+                'Sophia Green', 'William Brown', 'Carter King', 'Mason Hall', 'Madison White',
+                'Aiden Wilson', 'Lily Evans', 'Benjamin Taylor', 'Zoe Cooper', 'Emily Harris',
+                'Ella Green', 'Amelia White', 'Levi Mitchell', 'Caleb Taylor', 'Megan Harris',
+                'Scarlett Green', 'David Young', 'Benjamin Hall', 'Zoe White', 'Mia Harris',
+                'Jack King', 'Lillian Evans', 'Matthew Brown', 'Owen Harris', 'Ava Harris'
+            ];
+        
+            const fileFormats = ['pdf', 'xlsx', 'docx', 'txt', 'png', 'jpeg'];
+            let rows = '';
+            for (let i = 0; i < customerNames.length; i++) {
+                const name = customerNames[i];
+                const fileName = `${name.replace(' ', '_')}_${i + 1}.${fileFormats[i % fileFormats.length]}`;
+                const size = `${(Math.random() * (10 - 1) + 1).toFixed(2)} MB`;
+                const fileType = fileFormats[i % fileFormats.length].toUpperCase();
+                const date = `2025-${(Math.floor(Math.random() * 12) + 1).toString().padStart(2, '0')}-${(Math.floor(Math.random() * 28) + 1).toString().padStart(2, '0')}`;
+        
+                rows += `
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${fileName}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${size}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${fileType}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${date}</td>
+                    </tr>
+                `;
+            }
+            return rows;
+        }
+        
+        // Function to show the custom success popup
+        function showDeleteSuccessPopup() {
+            // Create the success popup element
+            const popup = document.createElement('div');
+            popup.style.position = 'fixed';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.background = '#4CAF50';
+            popup.style.color = 'white';
+            popup.style.padding = '20px';
+            popup.style.borderRadius = '10px';
+            popup.style.display = 'flex';
+            popup.style.alignItems = 'center';
+            popup.style.justifyContent = 'center';
+            popup.style.fontSize = '16px';
+            popup.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.5)';
+            
+            // Add a checkmark icon and message
+            popup.innerHTML = `
+                <span style="margin-right: 10px; font-size: 20px;">&#10004;</span> 
+                <span>Action Irreversible!!</span>
+            `;
+            
+            document.body.appendChild(popup);
+        
+            const closeButton = document.getElementById('closePopup');
+            closeButton.addEventListener('click', function() {
+                popup.style.display = 'none'; // Hide the popup when user clicks "Close"
+            });
+        }
+        
+                
+        
+        // Close modal if clicked outside content area
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('passkeyModal')) {
+                document.getElementById('passkeyModal').style.display = 'none';
+            }
+        }
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = `${e.pageX}px`;
+            cursor.style.top = `${e.pageY}px`;
+        });
+
+    </script>
+</body>
+</html>
